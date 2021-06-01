@@ -313,6 +313,11 @@ public class DDSpan implements AgentSpan, CoreSpan<DDSpan> {
   }
 
   @Override
+  public CharSequence getOrigin() {
+    return context.getOrigin();
+  }
+
+  @Override
   public final DDSpan setOperationName(final CharSequence operationName) {
     context.setOperationName(operationName);
     return this;
