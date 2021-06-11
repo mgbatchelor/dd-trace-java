@@ -42,7 +42,7 @@ public final class JedisInstrumentation extends Instrumenter.Tracing {
   public void adviceTransformations(AdviceTransformation transformation) {
     transformation.applyAdvice(
         isMethod()
-          .and(isPublic())
+          .and(isPublic()),
         JedisInstrumentation.class.getName() + "$JedisAdvice");
   }
 
