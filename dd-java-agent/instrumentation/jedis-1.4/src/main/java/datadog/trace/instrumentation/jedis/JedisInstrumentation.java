@@ -31,14 +31,8 @@ public final class JedisInstrumentation extends Instrumenter.Tracing {
   }
 
   @Override
-  public ElementMatcher<ClassLoader> classLoaderMatcher() {
-    // Avoid matching 3.x
-    return not(hasClassesNamed("redis.clients.jedis.commands.ProtocolCommand"));
-  }
-
-  @Override
   public ElementMatcher<TypeDescription> typeMatcher() {
-    return named("redis.clients.jedis.Protocol");
+    return named("redis.clients.jedis.Jedis");
   }
 
   @Override
@@ -52,20 +46,17 @@ public final class JedisInstrumentation extends Instrumenter.Tracing {
   public void adviceTransformations(AdviceTransformation transformation) {
     transformation.applyAdvice(
         isMethod()
-            .and(isPublic())
-            .and(named("sendCommand"))
-            .and(takesArgument(1, named("redis.clients.jedis.Protocol$Command"))),
+          .and(isPublic())
         JedisInstrumentation.class.getName() + "$JedisAdvice");
-    // FIXME: This instrumentation only incorporates sending the command, not processing the result.
   }
 
   public static class JedisAdvice {
 
     @Advice.OnMethodEnter(suppress = Throwable.class)
-    public static AgentScope onEnter(@Advice.Argument(1) final Command command) {
+    public static AgentScope onEnter(@Advice.Origin("#m") final String methodName) {
       final AgentSpan span = startSpan(REDIS_COMMAND);
       DECORATE.afterStart(span);
-      DECORATE.onStatement(span, command.name());
+      DECORATE.onStatement(span, methodName.toUpperCase());
       return activateSpan(span);
     }
 
